@@ -28,6 +28,18 @@ class HelloView(TemplateView):
         self.params['form'] = SessionForm(request.POST)
         return render(request, 'hello/index.html', self.params)
 
+def sample_middleware(get_response):
+
+    def middleware(request):
+        counter = request.session.get('counter', 0)
+        request.session['counter'] = counter + 1
+        response = get_response(request)
+        print("count: " + str(counter))
+        return response
+
+    return middleware
+
+
 # if ('check' in request.POST):
 #     self.params['result'] = 'Checked!!'
 # else:
