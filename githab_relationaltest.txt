@@ -1,4 +1,4 @@
-#テストでファイルを追加してみるよ。
+#2025.12.10 テストでファイルを追加してみるよ。
 from django.urls import path
 from . import views
 
