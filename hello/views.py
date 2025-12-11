@@ -1,56 +1,57 @@
 from django.shortcuts import render
-# from django.http import HttpResponse
-from django.views.generic import TemplateView
+from django.shortcuts import redirect
+from .models import Friend
+from .forms import HelloForm
 
-from .forms import SessionForm
+def index(request):
+    # num = Friend.objects.all().count()
+    # first = Friend.objects.all().first()
+    # last = Friend.objects.all().last()
+    data = Friend.objects.all().values('id', 'name', 'gender', 'age')
+    params = {
+        'title':'Hello!!',
+        'lead':'Django演習をしています。ここには見出しのテキストを入れてみています。<br> \
+        プログラム同士の関係を理解するのがなかなか難しいです<br>  \
+        改行タグを効かせたい場合は「|safe」を使うそうです。',
+        # 'message': 'all friends',
+        # 'form':HelloForm(),
+        'data': data,
+    }
+    return render(request, 'hello/index.html', params)
 
-class HelloView(TemplateView):
+#Create Model
+def create(request):
+    params = {
+        'title':'Create',
+        'form':HelloForm(),
+    }
+    if (request.method == 'POST'):
+        name = request.POST['name']
+        mail = request.POST['mail']
+        gender = 'gender' in request.POST
+        age = int(request.POST['age'])
+        birth = request.POST['birthday']
+        friend = Friend(name=name, mail=mail, gender=gender, \
+            age=age, birthday=birth)
+        friend.save()
+        return redirect(to='/hello')
+    return render(request, 'hello/create.html', params)
 
-    def __init__(self):
-        self.params = {
-            'title':'Hello！',
-            'lead':'Django演習をしています。ここには見出しのテキストを入れてみています。<br> \
-            プログラム同士の関係を理解するのがなかなか難しいです<br>  \
-            改行タグを効かせたい場合は「|safe」を使うそうです。',
-            'form': SessionForm(),
-            'result':None
-        }
-    
-    def get(self, request):
-        self.params['result'] = request.session.get('last_msg', 'No message')
-        return render(request, 'hello/index.html', self.params)
-    
-    def post(self, request):
-        ses = request.POST['session']
-        result = '<ol class="list-group"><b>selected:<b>'
-        self.params['result'] = 'send:"' + ses + '"."'
-        request.session['last_msg'] = ses
-        self.params['form'] = SessionForm(request.POST)
-        return render(request, 'hello/index.html', self.params)
+# def __new_str__(self):
+#     result = ''
+#     for item in self:
+#         result += '<tr>'
+#         for k in item:
+#             result += '<td>' + str(k) + '=' + str(item[k]) + '</td>'
+#         result += '</tr>'
+#     return result
 
-def sample_middleware(get_response):
+# QuerySet.__str__ = __new_str__
 
-    def middleware(request):
-        counter = request.session.get('counter', 0)
-        request.session['counter'] = counter + 1
-        response = get_response(request)
-        print("count: " + str(counter))
-        return response
-
-    return middleware
-
-
-# if ('check' in request.POST):
-#     self.params['result'] = 'Checked!!'
-# else:
-#     self.params['result'] = 'not checked...'
-# self.params['form'] = HelloForm(request.POST)
-# return render(request, 'hello/index.html', self.params)
-
-
-# msg = 'あなたは<b>' + request.POST['name'] + \
-# '(' + request.POST['age'] + ')</b>さんです。 <br>メールアドレスは<b>' \
-# + request.POST['mail'] + '</b>ですね。'
-# self.params['message'] = msg
-# self.params['form'] = HelloForm(request.POST)
-# return render(request, 'hello/index.html', self.params)    
+    # if (request.method == 'POST'):
+    #     num=request.POST['id']
+    #     item = Friend.objects.get(id=num)
+    #     params['data'] = [item]
+    #     params['form'] = HelloForm(request.POST)
+    # else:
+    #     params['data'] = Friend.objects.all()
