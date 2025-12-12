@@ -1,5 +1,12 @@
 from django import forms
+from.models import Friend
 
+class FriendForm(forms.ModelForm):
+    class Meta:
+        model = Friend
+        fields = ['name', 'mail', 'gender', 'age', 'birthday']
+
+#Friend追加用のフォーム
 class HelloForm(forms.Form):
     name = forms.CharField(label='Name', \
         widget=forms.TextInput(attrs={'class':'form-control'}))
@@ -11,6 +18,15 @@ class HelloForm(forms.Form):
         widget=forms.NumberInput(attrs={'class':'form-control'}))
     birthday = forms.DateField(label='Birth', \
         widget=forms.DateInput(attrs={'class':'form-control'}))
+    
+#検索用のフォーム
+class FindForm(forms.Form):
+    find = forms.CharField(label='Find', required=False, \
+        widget=forms.TextInput(attrs={'class':'form-control'}))
+
+class CheckForm(forms.Form):
+    str = forms.CharField(label='Name',\
+        widget=forms.TextInput(attrs={'class':'form-control'}))
 
     # id = forms.IntegerField(label='ID')
     # file = forms.ImageField(label='ID') #間違いで出てきたフォーム

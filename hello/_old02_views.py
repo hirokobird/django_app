@@ -6,28 +6,17 @@ from django.views.generic import ListView
 from django.views.generic import DetailView
 from .forms import FindForm
 from django.db.models import Q
-from django.db.models import Count,Sum,Avg,Min,Max
-from .forms import CheckForm
-
+# from .forms import HelloForm
 
 #トップページ・index
 def index(request):
-    data = Friend.objects.all()
-    re1 = Friend.objects.aggregate(Count('age'))
-    re2 = Friend.objects.aggregate(Sum('age'))
-    re3 = Friend.objects.aggregate(Avg('age'))
-    re4 = Friend.objects.aggregate(Min('age'))
-    re5 = Friend.objects.aggregate(Max('age'))
-    msg = 'count:' +str(re1['age__count']) \
-        + '<br>Sum:' +str(re2['age__sum']) \
-        + '<br>Average:' +str(re3['age__avg']) \
-        + '<br>Min:' +str(re4['age__min']) \
-        + '<br>Max:' +str(re5['age__max']) 
+    data = Friend.objects.all().values('id', 'name', 'gender', 'age')
     params = {
         'title':'Hello!!',
         'lead':'Django演習をしています。ここには見出しのテキストを入れてみています。<br> \
+        プログラム同士の関係を理解するのがなかなか難しいです<br>  \
         改行タグを効かせたい場合は「|safe」を使うそうです。',
-        'message': msg,
+        # 'message': 'all friends',
         # 'form':HelloForm(),
         'data': data,
     }
@@ -39,6 +28,13 @@ def create(request):
         obj = Friend()
         friend = FriendForm(request.POST, instance=obj)
         friend.save()
+        # name = request.POST['name']
+        # mail = request.POST['mail']
+        # gender = 'gender' in request.POST
+        # age = int(request.POST['age'])
+        # birth = request.POST['birthday']
+        # friend = Friend(name=name, mail=mail, gender=gender, \
+        #     age=age, birthday=birth)
         return redirect(to='/hello')
     params = {
         'title':'Page CreateFriends',
@@ -83,16 +79,12 @@ class FriendDetail(DetailView):
 #フレンドの検索
 def find(request):
     if (request.method == 'POST'):
-        msg = request.POST['find']
+        msg = 'search result:'
         form = FindForm(request.POST)
-        sql = 'select * from hello_friend'
-        if (msg != ''):
-            sql += ' where ' + msg
-        data = Friend.objects.raw(sql)
-        msg = sql
-        # find = request.POST['find']
-        # list = find.split()
-        # data = Friend.objects.all()[int(list[0]):int(list[1])]
+        find = request.POST['find']
+        list = find.split()
+        data = Friend.objects.filter(name__in=list)
+
     else:
         msg = 'search words...'
         form = FindForm()
@@ -103,29 +95,23 @@ def find(request):
         'form': form,
         'data': data,
     }
-    return render(request, 'hello/find.html', params)
+    return render(request, 'hello/find.html', params)    
 
-def check(request):
-    params = {
-    'title':'Page Check',
-    'message':'check validation.',
-    'form': CheckForm(),
-}
-    if (request.method == 'POST'):
-        form = CheckForm(request.POST)
-        params['form'] = form
-        if (form.is_valid()):
-            params['message'] = 'OK!'
-        else:
-            params['message'] = 'no good.'
-        #     sql += ' where ' + msg
-        # data = Friend.objects.raw(sql)
-        # msg = sql
-        # find = request.POST['find']
-        # list = find.split()
-        # data = Friend.objects.all()[int(list[0]):int(list[1])]
+# def __new_str__(self):
+#     result = ''
+#     for item in self:
+#         result += '<tr>'
+#         for k in item:
+#             result += '<td>' + str(k) + '=' + str(item[k]) + '</td>'
+#         result += '</tr>'
+#     return result
+
+# QuerySet.__str__ = __new_str__
+
+    # if (request.method == 'POST'):
+    #     num=request.POST['id']
+    #     item = Friend.objects.get(id=num)
+    #     params['data'] = [item]
+    #     params['form'] = HelloForm(request.POST)
     # else:
-    #     msg = 'search words...'
-    #     form = FindForm()
-    #     data = Friend.objects.all()
-    return render(request, 'hello/find.html', params)
+    #     params['data'] = Friend.objects.all()
